@@ -5,14 +5,14 @@
 > - `Editor/UnrealEd/Classes/Editor/EditorEngine.h`
 > - `Runtime/Engine/Classes/Engine/GameEngine.h`
 
-`UEngine` 是一个 UObject 类型，
+`UEngine` 是一个 UObject 类型，是所有引擎类型的抽象基类。
 
 ```mermaid
 classDiagram
     UObject <|-- UEngine
-    FExec <|-- UEngine
     UEngine <|-- UGameEngine
     UEngine <|-- UEditorEngine
+    UEditorEngine <|-- UUnrealEdEngine
 
     class UEngine {
 
@@ -25,4 +25,10 @@ classDiagram
     class UEditorEngine {
 
     }
+
+    class UUnrealEdEngine {
+
+    }
 ```
+
+
