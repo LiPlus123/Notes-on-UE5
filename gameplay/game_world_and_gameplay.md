@@ -231,14 +231,13 @@ classDiagram
     AInfo <|-- AWorldSettings
     UWorld *-- ULevel
     ULevel o-- AWorldSettings
-    class AWorldSettings {
-        +ULevel* PersistentLevel
-    }
 
     class UWorld {
+        +ULevel* PersistentLevel
         +AWorldSettings* GetWorldSettings(...)
         +void InitializeNewWorld(...)
     }
+    
     class ULevel {
         -AWorldSettings WorldSettings
         +void SetWorldSettings(AWorldSettings*)
