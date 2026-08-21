@@ -94,7 +94,7 @@ graph TD
 classDiagram
     class SWidget {
         +int32 Paint(...)
-        +void Tick(...)$
+        +void Tick(...)*
 
         #void SWidgetConstruct(const FSlateBaseNamedArgs& Args)
     }
@@ -541,7 +541,7 @@ classDiagram
     class FChildren {
         -SWidget* Owner
         -FName Name
-        +int32 Num()$
+        +int32 Num()*
     } 
 ```
 

@@ -26,12 +26,12 @@ classDiagram
     UWidget <|-- UPanelWidget
 
     class UObject {
-        void ReleaseSlateResources(bool)$
+        void ReleaseSlateResources(bool)*
     }
 
     class UWidget {
         #SWidget MyWidget
-        #TSharedRef~SWidget~ RebuildWidget()$
+        #TSharedRef~SWidget~ RebuildWidget()*
         +TSharedRef~SWidget~ TakeWidget()
         +void ReleaseSlateResources(bool)
         +UPanelSlot* Slot
@@ -155,9 +155,9 @@ classDiagram
 
     class INamedSlotInterface {
         <<interface>>
-        +void GetSlotNames(...)$
-        +UWidget* GetContentForSlot(FName)$
-        +bool SetContentForSlot(FName, UWidget*)$
+        +void GetSlotNames(...)*
+        +UWidget* GetContentForSlot(FName)*
+        +bool SetContentForSlot(FName, UWidget*)*
         +bool ContainsContent(UWidget*)
         +FName FindSlotForContent(UWidget*)
         +void ReleaseNamedSlotSlateResources(bool)
@@ -180,8 +180,8 @@ classDiagram
         +void GetSlotNames(...)
         +UWidget* GetContentForSlot(FName)
         +bool SetContentForSlot(FName, UWidget*)
-        +bool Initialize()$
-        #void InitializeNativeClassData()$
+        +bool Initialize()*
+        #void InitializeNativeClassData()*
         +bool AddToPlayerScreen(int32)
         +bool AddToPlayerScreen(int32)
         +void RemoveFromViewport()
