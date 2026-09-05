@@ -9,7 +9,6 @@
 
 ```mermaid
 classDiagram
-    AActor o-- USceneComponent
     USceneComponent <|-- UCameraComponent
     USceneComponent <|-- UPrimitiveComponent
     UPrimitiveComponent  <|-- UMeshComponent
@@ -23,7 +22,7 @@ classDiagram
     ULightComponentBase <|-- ULightComponent
     ULightComponent <|-- UDirectionalLightComponent
     ALight *-- ULightComponent : LightComponent
-    AActor <|-- ALight
+
     ALight <|-- ADirectionalLight
     ALight <|-- APointLight
     ALight <|-- ARectLight
@@ -32,6 +31,11 @@ classDiagram
     ULocalLightComponent <|-- UPointLightComponent
     ULocalLightComponent <|-- URectLightComponent
     UPointLightComponent <|-- USpotLightComponent
+
+    class UCameraComponent {
+        +float FieldOfView
+        +float AspectRatio
+    }
 
     class UPrimitiveComponent {
         +UMaterialInterface* GetMaterial(int32)*
@@ -52,9 +56,198 @@ classDiagram
 
 ### 相机
 
+相机决定渲染时的观察视角，相机组件 `UCameraComponent` 决定了相机的具体参数，如视野（`FieldOfView`）、投影模式（`ProjectionMode`）等，详见[官方文档](https://dev.epicgames.com/documentation/unreal-engine/using-cameras-in-unreal-engine)。相机与后处理（PostProcess）紧密相关，相机组件 `UCameraComponent` 包含了后处理相关的设置，如 `PostProcessBlendWeight` 和 `PostProcessSettings`。具体的后处理参数，详见[官方文档](https://dev.epicgames.com/documentation/unreal-engine/post-process-effects-in-unreal-engine)
+
+```mermaid
+classDiagram
+    ACameraActor *-- UCameraComponent : CameraComponent
+    USceneComponent <|-- UCameraComponent
+    UCameraComponent o-- FPostProcessSettings : PostProcessSettings
+
+    class ACameraActor {
+        -UCameraComponent* CameraComponent
+        -USceneComponent* SceneComponent
+    }
+    
+    class UCameraComponent {
+        +ECameraProjectionMode ProjectionMode
+        +float FieldOfView
+        +float AspectRatio
+        +float OrthoWidth
+        +float PostProcessBlendWeight
+        +FPostProcessSettings PostProcessSettings;
+    }
+
+    class FPostProcessSettings {
+
+    }
+```
+
+在 Detials 面板上设置相机相关的参数：
+
+![](../.figures/camera_component_details.jpg)
+
 ### 图形与材质
 
+`UPrimitiveComponent` 是图形组件的“抽象”基类，提供了对材质的访问接口 `GetMaterial` 方法。`UMaterialInterface` 是材质的接口，`UMaterial` 和 `UMaterialInstance` 是其具体实现。
+
+```mermaid
+classDiagram
+    AStaticMeshActor *-- UStaticMeshComponent : StaticMeshComponent
+    UPrimitiveComponent  <|-- UMeshComponent
+    UMeshComponent <|-- UStaticMeshComponent
+    UMeshComponent <|-- USkinnedMeshComponent
+    USkinnedMeshComponent <|-- USkeletalMeshComponent
+    UMeshComponent o-- UMaterialInterface : OverrideMaterials
+    UMaterialInterface <|-- UMaterial
+    UMaterialInterface <|-- UMaterialInstance
+    UStaticMeshComponent *-- UStaticMesh : StaticMesh
+
+    class UPrimitiveComponent {
+        +UMaterialInterface* GetMaterial(int32)*
+    }
+    
+    class UMeshComponent {
+        +TArray~UMaterialInterface*~ OverrideMaterials;
+    }
+
+    class UStaticMeshComponent {
+        -UStaticMesh* StaticMesh
+    }
+
+    class AStaticMeshActor {
+        -UStaticMeshComponent* StaticMeshComponent
+    }
+
+    class UStaticMesh {
+
+    }
+```
+
+#### 静态网格体（Static Mesh）
+
+静态网格体（Static Mesh）表示一个不会发生形变的几何体，详见[官方文档](https://dev.epicgames.com/documentation/unreal-engine/static-meshes) 
+
 ### 光照
+
+天光：
+
+```mermaid
+classDiagram
+    AActor <|-- AInfo
+    AActor o-- USceneComponent
+    USceneComponent <|-- ULightComponentBase
+    ULightComponentBase <|-- USkyLightComponent
+    AInfo <|-- ASkyLight
+    ASkyLight *-- USkyLightComponent : LightComponent
+
+    class ASkyLight {
+        -USkyLightComponent* LightComponent
+    }
+```
+
+### 后处理
+
+```mermaid
+classDiagram
+    AActor o-- USceneComponent
+    AActor <|-- ACameraActor
+    ACameraActor *-- UCameraComponent : CameraComponent
+    USceneComponent <|-- UCameraComponent
+    UCameraComponent o-- FPostProcessSettings : PostProcessSettings
+    AActor <|-- ABrush
+    ABrush <|-- AVolume
+    AVolume <|-- APostProcessVolume
+    APostProcessVolume *-- FPostProcessSettings : Settings
+    class APostProcessVolume {
+        +FPostProcessSettings Settings
+    }
+
+
+    class ACameraActor {
+        -UCameraComponent* CameraComponent
+        -USceneComponent* SceneComponent
+    }
+    
+    class UCameraComponent {
+        +ECameraProjectionMode::Type ProjectionMode
+        +float FieldOfView
+        +float AspectRatio
+        +float OrthoWidth
+        +float PostProcessBlendWeight
+        +FPostProcessSettings PostProcessSettings;
+    }
+
+    class FPostProcessSettings {
+
+    }
+```
+
+### 全局光照
+
+### 大气与雾气
+
+详见[官方文档](https://dev.epicgames.com/documentation/unreal-engine/environmental-light-with-fog-clouds-sky-and-atmosphere-in-unreal-engine)
+
+全局高度雾：
+
+```mermaid
+classDiagram
+    AActor <|-- AInfo
+    AActor o-- USceneComponent
+    USceneComponent <|-- UExponentialHeightFogComponent
+    AInfo <|-- AExponentialHeightFog
+    AExponentialHeightFog *-- UExponentialHeightFogComponent : Component
+
+    class AExponentialHeightFog {
+        -UExponentialHeightFogComponent* Component
+    }
+```
+
+局部体积雾：
+
+```mermaid
+classDiagram
+    AActor <|-- AInfo
+    AActor o-- USceneComponent
+    USceneComponent <|-- ULocalFogVolumeComponent
+    AInfo <|-- ALocalFogVolume
+    ALocalFogVolume *-- ULocalFogVolumeComponent : LocalFogVolumeVolume
+
+    class ALocalFogVolume {
+        -ULocalFogVolumeComponent* LocalFogVolumeVolume
+    }
+```
+
+大气：
+
+```mermaid
+classDiagram
+    AActor <|-- AInfo
+    AActor o-- USceneComponent
+    USceneComponent <|-- USkyAtmosphereComponent
+    AInfo <|-- ASkyAtmosphere
+    ASkyAtmosphere *-- USkyAtmosphereComponent : SkyAtmosphereComponent
+
+    class ASkyAtmosphere {
+        -USkyAtmosphereComponent* SkyAtmosphereComponent
+    }
+```
+
+体积云：
+
+```mermaid
+classDiagram
+    AActor <|-- AInfo
+    AActor o-- USceneComponent
+    USceneComponent <|-- UVolumetricCloudComponent
+    AInfo <|-- AVolumetricCloud
+    AVolumetricCloud *-- UVolumetricCloudComponent : VolumetricCloudComponent
+
+    class AVolumetricCloud {
+        -UVolumetricCloudComponent* VolumetricCloudComponent
+    }
+```
 
 ## 渲染线程与渲染场景
 
@@ -110,6 +303,12 @@ classDiagram
     FMaterial <|-- FMaterialResource
     FSceneView <|-- FViewInfo
 
+    class UCameraComponent {
+        +void GetCameraView(float, FMinimalViewInfo&)*
+        +void AddOrUpdateBlendable(...)
+        +void RemoveBlendable(...)
+    }
+
     class FSceneInterface {
         +void AddPrimitive(UPrimitiveComponent*)*
         +void RemovePrimitive(UPrimitiveComponent*)*
@@ -137,6 +336,17 @@ classDiagram
     class FLightSceneProxy {
 
     }
+
+    class FMinimalViewInfo {
+        +FVector Location
+        +FRotator Rotation
+        +float FOV
+        +float PerspectiveNearClipPlane
+        +float AspectRatio
+        +ECameraProjectionMode ProjectionMode
+        +float PostProcessBlendWeight
+        +FPostProcessSettings PostProcessSettings
+    }
 ```
 
 ```mermaid
@@ -162,6 +372,10 @@ flowchart TB
     end
 ```
 
+在游戏的主线程，通过 `UCameraComponent::GetCameraView()` 函数，获取当前相机的 `FMinimalViewInfo` 信息，它是游戏线程相机属性的快照。
+
+
+
 在 SceneRendering.cpp 中，不同版本的 Unreal Engine 略有差异：
 
 Unreal Engine 5.5
@@ -182,7 +396,7 @@ classDiagram
     FSceneRenderer <|-- FMobileSceneRenderer
 ```
 
-## 延迟渲染管线
+## 延迟渲染管线与着色器
 
 ```mermaid
 classDiagram
@@ -193,5 +407,7 @@ classDiagram
 
     }
 ```
+
+### Shader
 
 ## RDG & RHI
